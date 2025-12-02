@@ -12,6 +12,9 @@ import type {
 } from './types';
 import { COMPOSERS, getComposersInOrder, type ComposerDefinition } from './composers';
 
+/** Maximum length for description excerpt in generated goals */
+const DESCRIPTION_MAX_LENGTH = 200;
+
 /**
  * Keywords that help identify which modules a feature belongs to
  */
@@ -82,8 +85,8 @@ function generateGoal(
 ): string {
   const baseGoal = composer.description;
   
-  // Add project-specific context
-  return `${baseGoal}\n\nProject Context: ${blueprint.name} - ${blueprint.description.slice(0, 200)}`;
+  // Add project-specific context with truncated description
+  return `${baseGoal}\n\nProject Context: ${blueprint.name} - ${blueprint.description.slice(0, DESCRIPTION_MAX_LENGTH)}`;
 }
 
 /**
@@ -164,11 +167,10 @@ export function formatPromptTask(task: PromptTask): string {
 export function categorizeFeatures(
   blueprint: Blueprint
 ): Record<ComposerModuleId, string[]> {
-  const categories: Record<ComposerModuleId, string[]> = {} as Record<ComposerModuleId, string[]>;
-  
-  for (const composer of COMPOSERS) {
-    categories[composer.module_id] = [];
-  }
+  // Initialize categories object with empty arrays for each composer
+  const categories = Object.fromEntries(
+    COMPOSERS.map((c) => [c.module_id, [] as string[]])
+  ) as Record<ComposerModuleId, string[]>;
 
   for (const feature of blueprint.features) {
     const featureLower = feature.toLowerCase();

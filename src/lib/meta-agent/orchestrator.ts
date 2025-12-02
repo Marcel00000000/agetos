@@ -28,9 +28,15 @@ import {
 import { COMPOSERS, getComposer, getComposersInOrder } from './composers';
 
 /**
- * Maximum number of processing rounds
+ * Maximum number of processing rounds before giving up.
+ * If the blueprint still needs work after this many rounds,
+ * the workflow will complete with a 'needs-revision' or 'incomplete' status.
  */
 const MAX_ROUNDS = 5;
+
+/** Mock execution time range for testing (in milliseconds) */
+const MIN_MOCK_EXECUTION_TIME = 500;
+const MAX_MOCK_EXECUTION_TIME = 1500;
 
 /**
  * Workflow event types
@@ -219,12 +225,13 @@ export class MetaAgentOrchestrator {
    * Mock execution for testing/demo purposes
    */
   private mockExecute(task: PromptTask): ComposerOutput {
+    const executionTime = Math.random() * (MAX_MOCK_EXECUTION_TIME - MIN_MOCK_EXECUTION_TIME) + MIN_MOCK_EXECUTION_TIME;
     return {
       module_id: task.module_id,
       status: 'completed',
       content: `// Generated code for ${task.module_id}\n// Goal: ${task.goal.split('\n')[0]}\n// Tech stack: ${task.tech_stack.join(', ')}`,
       output_type: task.output_type,
-      executionTime: Math.random() * 1000 + 500,
+      executionTime,
     };
   }
 

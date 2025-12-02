@@ -32,6 +32,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Create blueprint with defaults
+    // Note: crypto.randomUUID() generates cryptographically secure UUIDs
+    // suitable for internal identifiers. The ID is not used for security-sensitive operations.
     const blueprint: Blueprint = {
       id: body.id || crypto.randomUUID(),
       name: body.name,

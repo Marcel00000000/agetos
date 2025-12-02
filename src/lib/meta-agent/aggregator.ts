@@ -16,6 +16,12 @@ import type {
 } from './types';
 import { COMPOSERS, getComposer, getComposersInOrder } from './composers';
 
+/** Scoring constants for consistency review */
+const ERROR_PENALTY = 20;
+const WARNING_PENALTY = 5;
+/** Minimum consistency score required to consider the blueprint complete */
+const MINIMUM_ACCEPTABLE_SCORE = 80;
+
 /**
  * Collect outputs from all Composers
  */
@@ -160,10 +166,10 @@ export function performConsistencyReview(
 
   const allIssues = [...namingIssues, ...dependencyIssues, ...styleIssues];
   
-  // Calculate score
+  // Calculate score based on error and warning counts
   const errorCount = allIssues.filter((i) => i.severity === 'error').length;
   const warningCount = allIssues.filter((i) => i.severity === 'warning').length;
-  const score = Math.max(0, 100 - errorCount * 20 - warningCount * 5);
+  const score = Math.max(0, 100 - errorCount * ERROR_PENALTY - warningCount * WARNING_PENALTY);
 
   return {
     score,
@@ -247,7 +253,7 @@ export function aggregateBlueprint(
   let status: 'incomplete' | 'needs-revision' | 'complete';
   if (pending.length > 0 || failed.length > 0) {
     status = 'incomplete';
-  } else if (consistencyReview.score < 80) {
+  } else if (consistencyReview.score < MINIMUM_ACCEPTABLE_SCORE) {
     status = 'needs-revision';
   } else {
     status = 'complete';
